@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Server version="8">
+	<Name>StreamSyncEngine</Name>
+	<Type>Origin</Type>
+	<IP>*</IP>
+	<PrivacyProtection>false</PrivacyProtection>
+
+	<Modules>
+		<HTTP>
+			<Port>8080</Port>
+			<TLS>
+				<Port>8443</Port>
+				<!-- In prod, mount your letsencrypt certs here -->
+				<CertPath>/opt/ovenmediaengine/bin/cert.pem</CertPath>
+				<KeyPath>/opt/ovenmediaengine/bin/key.pem</KeyPath>
+				<ChainCertPath>/opt/ovenmediaengine/bin/chain.pem</ChainCertPath>
+			</TLS>
+		</HTTP>
+	</Modules>
+
+	<Bind>
+		<Providers>
+			<RTMP>
+				<Port>1935</Port>
+			</RTMP>
+		</Providers>
+
+		<Publishers>
+			<AppWorkerCount>1</AppWorkerCount>
+			<StreamWorkerCount>8</StreamWorkerCount>
+			<WebRTC>
+				<Timeout>30000</Timeout>
+				<Rtx>false</Rtx>
+				<Ulpfec>false</Ulpfec>
+				<JitterBuffer>false</JitterBuffer>
+			</WebRTC>
+			<HLS>
+				<SegmentDuration>2</SegmentDuration>
+				<SegmentWindow>3</SegmentWindow>
+				<CrossDomains>
+					<Url>*</Url>
+				</CrossDomains>
+			</HLS>
+			<LLHLS>
+				<SegmentDuration>2</SegmentDuration>
+				<SegmentWindow>3</SegmentWindow>
+				<CrossDomains>
+					<Url>*</Url>
+				</CrossDomains>
+			</LLHLS>
+		</Publishers>
+	</Bind>
+
+	<VirtualHosts>
+		<VirtualHost>
+			<Name>default</Name>
+			<Distribution>ovenmediaengine.com</Distribution>
+			
+			<Host>
+				<Names>
+					<Name>*</Name>
+				</Names>
+			</Host>
+
+			<!-- 
+                Application: "app"
+                Stream URL: rtmp://localhost:1935/app/stream_key 
+                Playback: http://localhost:8080/app/stream_key/playlist.m3u8
+            -->
+			<Applications>
+				<Application>
+					<Name>app</Name>
+					<Type>Live</Type>
+					<OutputProfiles>
+						<OutputProfile>
+							<Name>bypass_stream</Name>
+							<OutputStreamName>${OriginStreamName}</OutputStreamName>
+							<Encodes>
+								<Video>
+									<Bypass>true</Bypass>
+								</Video>
+								<Audio>
+									<Bypass>true</Bypass>
+								</Audio>
+							</Encodes>
+						</OutputProfile>
+					</OutputProfiles>
+					<Providers>
+						<RTMP />
+					</Providers>
+					<Publishers>
+						<AppWorkerCount>1</AppWorkerCount>
+						<StreamWorkerCount>8</StreamWorkerCount>
+						<WebRTC />
+						<LLHLS>
+                            <ChunkDuration>0.5</ChunkDuration>
+                        </LLHLS>
+                        <HLS />
+					</Publishers>
+				</Application>
+			</Applications>
+		</VirtualHost>
+	</VirtualHosts>
+</Server>

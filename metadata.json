@@ -1,0 +1,8 @@
+{
+  "name": "StreamSync",
+  "description": "A modern, high-performance live streaming platform frontend designed for low-latency playback with OvenMediaEngine integration features.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
